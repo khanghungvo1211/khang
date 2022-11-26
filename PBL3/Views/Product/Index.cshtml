@@ -1,0 +1,237 @@
+﻿@using Models.DTO
+@using Models.ViewModel
+@model Product
+
+@{
+    ViewBag.Title = Model.Name;
+    List<Comment> comments = ViewBag.Comments as List<Comment>;
+    List<Rating> rates = ViewBag.Rates;
+}
+@section Styles {
+    <link rel="stylesheet" href="~/public/css/ProductDetail.css">
+}
+<div class="container" style="width: 73.7em">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="width-image border">
+                <img src="@Model.Image" alt="" style="width: 100%;object-fit:cover ">
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="product-dtl bg-white p-4 rounded">
+                <div class="product-info">
+                    <div class="row">
+                        <div class="product-name col-md-9">@Model.Name</div>
+                        @if (Model.Stock <= 0)
+                        {
+                            <div class="product-state col-md-3 bg-danger text-white rounded p-1 text-center">Hết hàng</div>
+                        }
+                    </div>
+
+                    <div class="reviews-counter d-flex align-items-center">
+                        <div>
+
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                if (i <= ViewBag.AvgRating)
+                                {
+                                    <span class="fa fa-star star-active"></span>
+                                }
+                                else
+                                {
+                                    <span class="fa fa-star star-inactive"></span>
+                                }
+                            }
+
+                        </div>
+                        <p class="p-0 m-0 ms-2">@comments.Count() Đánh giá</p>
+                    </div>
+                    <div class="product-price-discount m-0 text-danger p-0">
+                        <span>@String.Format("{0:0,0}", Model.Price) đ</span>
+                    </div>
+                </div>
+                <div class="tab-pane fade show active mt-2" id="description" role="tabpanel"
+                     aria-labelledby="description-tab">
+                    @Model.Description
+                </div>
+                <hr>
+                <div class="row d-flex justify-content-center">
+                    <div class="d-flex flex-column fs-6 align-items-center col-3 justify-content-center">
+                        <span>@Model.Mass kg</span>
+                        <span class="fw-bold">Khối lượng</span>
+                    </div>
+                    <div class="d-flex flex-column align-items-center col-3 justify-content-center">
+                        <span>@Model.Power W</span>
+                        <span class="fw-bold">Công suất</span>
+                    </div>
+                    <div class="d-flex flex-column align-items-center col-4 justify-content-center">
+                        <span>@Model.MaintenanceTime tháng</span>
+                        <span class="fw-bold">Thời gian bảo hành</span>
+                    </div>
+                </div>
+                <hr>
+                @using (Html.BeginForm("Add", "Cart", FormMethod.Post, new { @enctype = "multipart/form-data" }))
+                {
+                    <div class="row">
+                        @Html.HiddenFor(model => model.ID, new { @id = "productID" })
+                        <div class="col-md-6">
+                            <div class="product-count">
+                                <p class="m-0 p-0">@Model.Stock sản phẩm có sẵn</p>
+                                <div class="d-flex p-1">
+                                    <button id="qtyminus" class="qtyminus" type="button">-</button>
+                                    <input type="text" name="quantity" value="1" min="1" id="qty" class="qty">
+                                    <button id="qtyplus" class="qtyplus" type="button">+</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 m-0 p-0 text-end mt-auto">
+                            <button class="btn btn-dark" type="submit" id="btnSubmit">
+                                <i class="fa-solid fa-cart-plus"></i>
+                                Thêm vào giỏ hàng
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+        @if (comments.Count > 0)
+        {
+            <div class="row d-flex mt-5 justify-content-between m-0 p-0">
+                <div class="row justify-content-center">
+                    <div class="row justify-content-center col-8 m-0 p-0">
+                        @foreach (Comment comment in comments)
+                        {
+                            <div class="mt-3">
+                                <div class="d-flex bg-white p-3">
+                                    <div class="">
+                                        <img class="profile-pic mt-3"
+                                             src="@comment.User.Image" style="object-fit:cover">
+                                    </div>
+                                    <div class="d-flex flex-column" style="text-align: left; width: 100%">
+                                        <h3 class="mt-2 mb-0 name_user">@comment.User.Name</h3>
+                                        <div>
+                                            <p class="text-left m-0">
+                                                @for (int i = 1; i <= 5; i++)
+                                                {
+                                                    if (i <= comment.Rate)
+                                                    {
+                                                        <span class="fa fa-star star-active ml-3"></span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="fa fa-star star-inactive"></span>
+                                                    }
+                                                }
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <p class="content">@comment.Content</p>
+                                            @if (comment.isReply)
+                                            {
+                                                <p class="content p-0 m-0">Phản hồi: @comment.Reply.Content</p>
+                                            }
+
+                                        </div>
+                                    </div>
+                                    <div class="" style="text-align: right; width: 100px">
+                                        <p class="text-muted pt-5 pt-sm-3">@comment.CreatedAt.ToString("HH:mm dd/MM/yyyy")</p>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="col-4 mt-3">
+                        <div class="bg-white rounded">
+                            <canvas id="myChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        }
+        else
+        {
+            <div class="d-flex flex-column justify-content-center align-items-center">
+                <script src=@("https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js")></script>
+                <lottie-player src="https://assets2.lottiefiles.com/private_files/lf30_cgfdhxgx.json" background="transparent" speed="1" style="width: 300px; height: 300px;" loop autoplay></lottie-player>
+                <h3>Chưa có đánh giá</h3>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="position-fixed d-flex justify-content-end p-3" style="z-index: 11; top: 10%">
+    <div id="notification_toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <i class="fa-solid fa-bell"></i>
+            <strong class="me-auto ms-1">Thông báo</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body text-white bg-success" id="toast_body">
+
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/public/js/ProductDetail.js"></script>
+    <script>
+        const config = {
+            type: 'pie',
+            data: {
+                labels: ['1 sao', '2 sao', '3 sao', '4 sao', '5 sao'],
+                datasets: [{
+                    backgroundColor: ['rgb(255, 99, 132)', '#FF9D3B', '#4BC0C0', '#36A2EB', '#FFCD56'],
+                    data: [@string.Join(", ", rates.Select(x => $"{x.quantity}"))],
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Điểm đánh giá'
+                    }
+                },
+            },
+        };
+        const myChart = new Chart(
+            document.getElementById('myChart'),
+            config
+        );
+        let showToast = (status, message) => {
+            const toastBody = document.getElementById('toast_body');
+            if (status) {
+                if (toastBody.classList.contains('bg-danger')) toastBody.classList.remove('bg-danger');
+                if (!toastBody.classList.contains('bg-success')) toastBody.classList.add('bg-success');
+            } else {
+                if (!toastBody.classList.contains('bg-danger')) toastBody.classList.add('bg-danger');
+                if (toastBody.classList.contains('bg-success')) toastBody.classList.remove('bg-success');
+            }
+            toastBody.innerText = message;
+            $("#notification_toast").toast('show');
+        };
+
+        document.querySelector("#btnSubmit").addEventListener('click', function (e) {
+            e.preventDefault();
+            let data = {
+                productID: document.querySelector("#productID").value,
+                quantity: document.querySelector("#qty").value
+            };
+            $.ajax({
+                type: "POST",
+                url: `/Cart/Add`,
+                data: JSON.stringify(data),
+                dataType: 'json',
+                contentType: "application/json; charset=utf-8",
+                success: function (res) {
+                    showToast(res.status, res.message);
+                }
+            })
+        });
+    </script>
+}

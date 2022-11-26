@@ -1,0 +1,210 @@
+﻿@using Models.DTO
+@model List<Order>
+@{
+    ViewBag.Title = "Danh sách đơn hàng";
+    List<State> states = ViewBag.States as List<State>;
+}
+@section Styles{
+    <style>
+        .order-header:hover {
+            color: #dc3545 !important;
+        }
+    </style>
+}
+<div class="row m-auto rounded" style="width: 73.7em">
+    <div class="col-12 rounded">
+        <div class="col-12 d-flex justify-content-between">
+            @using (Html.BeginForm("Orders", "User", FormMethod.Get, new { @class = "col-12 d-flex justify-content-between" }))
+            {
+                <div class="col-4">
+                    <select class="form-select" aria-label="Default select example" name="stateID">
+                        <option selected value="0">Trạng thái đơn hàng</option>
+                        @foreach (State state in states)
+                        {
+                            <option value="@state.ID">@state.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-4 d-flex">
+                    <input type="text" class="form-control" placeholder="Nhập từ khóa tìm kiếm" name="keyword">
+                    <button class="btn btn-outline-primary" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+                </div>
+            }
+        </div>
+        @if (Model != null && Model.Count > 0)
+        {
+            foreach (Order order in Model)
+            {
+                <div class="bg-white p-3 shadow rounded mt-3">
+                    <a class="col-12 d-flex justify-content-between text-decoration-none text-dark order-header" href="@Url.Action("Index", "Order", new { id = order.ID })">
+                        <h6 class="p-0 m-0 fw-bold">ID đơn hàng: @order.ID</h6>
+                        <p class="p-0 m-0 fw-bold">@order.StateOrder.First().State.Name</p>
+                    </a>
+                    <hr>
+                    @foreach (ProductOrder productOrder in order.ProductOrder)
+                    {
+                        <div class="col-12 d-flex">
+                            <div class="col-1 border" style="height: 10vh">
+                                @if (productOrder.Product == null)
+                                {
+                                    <img src="" alt="" style="width: 100%;height: 100%;object-fit:cover">
+                                }
+                                else
+                                {
+                                    <img src="@productOrder.Product.Image" alt="" style="width: 100%;height: 100%;object-fit:cover">
+                                }
+
+                            </div>
+                            <div class="col-11 d-flex justify-content-between">
+                                <div class="ms-3">
+                                    @if (productOrder.Product == null)
+                                    {
+                                        <a class="p-0 m-0 fw-bold text-decoration-none text-dark">Sản phẩm đã bị xóa</a>
+                                    }
+                                    else
+                                    {
+                                        <a class="p-0 m-0 fw-bold text-decoration-none text-dark" href="@Url.Action("Index", "Product", new { id = productOrder.ProductID })">@productOrder.Product.Name</a>
+                                    }
+                                    <p class="p-0 m-0 text-muted">Số lượng: @productOrder.Quantity</p>
+                                </div>
+                                <div class="d-flex flex-column justify-content-between">
+                                    <p class="p-0 m-0 text-danger fw-bold text-end">@String.Format("{0:0,0}", productOrder.Price) đ</p>
+                                    @if (productOrder.Product != null && order.isReceived)
+                                    {
+                                        if (productOrder.isComment)
+                                        {
+                                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#commentModal" data-id="@productOrder.ID" onclick="loadOrderDetail(this)">Xem đánh giá</button>
+                                        }
+                                        else
+                                        {
+                                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#commentModal" data-id="@productOrder.ID" onclick="loadOrderDetail(this)">Đánh giá</button>
+                                        }
+
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                    }
+                    <div class="col-12 d-flex">
+                        @if (order.UpdatedAt != null)
+                        {
+                            <div class="col-3 mt-auto">
+                                <div class="text-muted fs-6">Cập nhật vào lúc: @(((DateTime)(order.UpdatedAt)).ToString("hh:mm dd/MM/yyyy"))</div>
+                            </div>
+                        }
+                        <div class="col-3 ms-auto">
+                            <div class="col-12 d-flex justify-content-between">
+                                <div>Voucher</div>
+                                <div class="text-danger fw-bold">-@String.Format("{0:0,0}", order.Sale) đ</div>
+                            </div>
+                            <div class="col-12 d-flex justify-content-between">
+                                <div>Tổng số tiền</div>
+                                <div class="text-danger fw-bold">@String.Format("{0:0,0}", order.Total - order.Voucher.Value) đ</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <script src="@("https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js")"></script>
+            <lottie-player src="https://assets7.lottiefiles.com/packages/lf20_3qzrm0wa.json" background="transparent" speed="1" style="width: 400px; height: 400px;" loop autoplay class="m-auto"></lottie-player>
+            <h3 class="text-center">Không tìm thấy đơn hàng</h3>
+        }
+    </div>
+</div>
+
+<div class="modal fade" id="commentModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header p-2 d-flex align-items-center justify-content-between">
+                <h5 class="m-0 d-flex align-items-center">
+                    Đánh giá sản phẩm
+                </h5>
+                <button type="button" class="btn close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">X</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="notification">
+
+                </div>
+                <div class="col-md-12">
+                    <div class="row">
+                        <input value="" id="productOrder_ID" class="d-none" />
+                        <div class="mb-3">
+                            <label class="form-label">Tên sản phẩm</label>
+                            <input type="text" class="form-control" id="product_Name" disabled>
+                        </div>
+                    </div>
+                    <div class="row">
+                            <div class="mb-3">
+                                <label class="form-label">Rating</label>
+                                <input type="number" max="5" min="1" class="form-control" id="rating" placeholder="Nhập điểm đánh giá">
+                            </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="content">Nhận xét</label>
+                        <textarea class="form-control" id="content" rows="3" placeholder="Hãy chia sẻ những điều bạn thích về sản phẩm này" name="content"></textarea>
+                    </div>
+                    <p id="createdAt"></p>
+                    <p id="updatedAt"></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Thoát</button>
+                <button type="button" class="btn btn-primary" id="btnSubmit">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script>
+        $('#btnSubmit').click(e => {
+            const notification = document.getElementById('notification');
+            notification.innerHTML = '';
+            $.ajax({
+                type: "POST",
+                url: `/Comment/Comment`,
+                data: JSON.stringify({
+                    ID: $('#productOrder_ID').val(),
+                    Content: $('#content').val(),
+                    Rate: $("#rating").val()
+                }),
+                dataType: 'json',
+                contentType: "application/json; charset=utf-8",
+                success: function (res) {
+                    notification.innerHTML = `<div class="alert ${res.status ? 'alert-success' : 'alert-danger'}" role="alert">` +
+                        res.message +
+                    '</div>';
+                }
+            })
+        });
+        const loadOrderDetail = (e) => {
+            $.ajax({
+                type: "POST",
+                url: `/Order/OrderDetail`,
+                data: JSON.stringify({
+                    ID: e.dataset.id,
+                }),
+                dataType: 'json',
+                contentType: "application/json; charset=utf-8",
+                success: function (res) {
+                    if (res.status) {
+                        const name = document.getElementById('product_Name');
+                        name.value = res.data.Product.Name;
+                        if (res.data.Comment != null) {
+                            $('#content').val(res.data.Comment.Content);
+                            $("#rating").val(res.data.Comment.Rate);
+                        }
+                        $('#productOrder_ID').val(res.data.ID);
+                    }
+                }
+            })
+        };
+    </script>
+}

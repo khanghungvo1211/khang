@@ -1,0 +1,250 @@
+﻿@using Models.DTO
+@using PBL3.Models
+@{
+    ViewBag.Title = "KShop";
+    List<Product> products = ViewBag.products as List<Product>;
+    List<Product> lastedProducts = ViewBag.lastedProduct as List<Product>;
+    List<Category> categories = ViewBag.categories as List<Category>;
+    List<Voucher> lastedVoucher = ViewBag.lastedVoucher as List<Voucher>;
+    Layout = "~/Views/Shared/_Landing.cshtml";
+}
+@section Styles
+{
+    <link rel="stylesheet" href="~/public/css/lightslider.min.css" />
+    <style>
+        .lSNext {
+            color: black;
+            font-size: 2rem;
+            background-color: white;
+            text-decoration: none;
+            border-radius: 200px;
+            text-align: center;
+            line-height: 28px;
+        }
+
+        .lSPrev {
+            color: black;
+            font-size: 2rem;
+            background-color: white;
+            text-decoration: none;
+            border-radius: 200px;
+            text-align: center;
+            line-height: 28px;
+        }
+
+        .product_hover:hover {
+            box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+        }
+    </style>
+}
+<section class="p-0 bg-light" style="height: 100vh">
+    <div class="container text-center text-md-start">
+        <div class="row d-flex">
+            <div class="col-md-3 col-lg-4 col-xl-3 mx-auto mb-4 d-flex flex-column justify-content-center align-items-center">
+                <div class="text-uppercase fw-bold text-center">
+                    <img src="~/favicon.png"><h1 class="text-danger fw-bold mt-1">Minishop</h1>
+                </div>
+                <p class="text-center">
+                    Chúng tôi ở đây với xứ mệnh đảm bảo chất lượng sản phẩm và dịch vụ để mang lại cho bạn một trải nghiệm chưa từng có trong đời.
+                </p>
+                <button class="btn btn-danger col-12 ">Khám phá ngay</button>
+            </div>
+            <div class="col-8" style="position: relative;">
+                <div style="width: 400px; height: 400px;right: 20%;top:30%;position: absolute;" class="bg-danger rounded-circle"></div>
+                <script src=@("https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js")></script>
+                <lottie-player src="https://assets1.lottiefiles.com/packages/lf20_5ngs2ksb.json" background="transparent" speed="1" style="width: 100%; height: 100%;" loop autoplay></lottie-player>
+            </div>
+        </div>
+    </div>
+</section>
+<div class="row m-auto mt-5 p-3" style="width: 73.7em">
+    <div class="col-md-8 text-center" style="position:relative">
+        <div class="col-12 border d-flex align-items-center justify-content-center"><h3>Sản phẩm mới</h3></div>
+        <ul id="lastedProduct" class="cs-hidden">
+            @foreach (Product product in lastedProducts)
+            {
+                <li>
+                    <figure class="figure rounded m-1 p-0 border product_hover" style="width: 14rem">
+                        <a href="@Url.Action("Index", "Product", new { id = product.ID })">
+                            <img src="@product.Image"
+                                 class="figure-img img-fluid rounded-top border-bottom mb-0"
+                                 style="width: 100%; height: 250px;object-fit: cover;">
+                        </a>
+                        <figcaption class="text-start p-2 m-0 rounded-end bg-white" style="background-color: #F0F2F5">
+                            <a class="m-0 fw-bold text-dark text-decoration-none" href="@Url.Action("Index", "Product", new { id = product.ID })">@product.Name</a>
+                            <p class="m-0 text-danger">@String.Format("{0:0,0}", product.Price) đ</p>
+                            <div class="m-0 d-flex justify-content-between align-items-center">
+                                @if (product.Stock > 0)
+                                {
+                                    <div class="text-white bg-success rounded p-1">
+                                        Còn hàng
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="text-white bg-danger rounded p-1">
+                                        Hết hàng
+                                    </div>
+                                }
+                                <div class="fs-6">
+                                    Đã bán @product.Sold
+                                </div>
+                            </div>
+                        </figcaption>
+                    </figure>
+                </li>
+            }
+        </ul>
+    </div>
+    <div class="col-md-4">
+        <div class="border text-center d-flex justify-content-center align-items-center flex-column p-3 mt-4 mt-md-0">
+            <h3 class="m-0">@DateTime.Now.ToString("dddd")</h3>
+            <h3 class="m-0">@DateTime.Now.ToString("dd/MM/yyyy")</h3>
+            <p class="m-0 mt-3 ">Nếu bạn không ngừng nghĩ về nó. Thì hãy <b class="text-danger">mua</b> nó</p>
+        </div>
+        <div class="border mt-3 text-center">
+            <h4 class="p-2 m-0">
+                <i class="fa-solid fa-ticket"></i> Voucher
+            </h4>
+            <ul id="voucher" class="cs-hidden">
+                @foreach (Voucher voucher in lastedVoucher)
+                {
+                    <li>
+                        <div class="m-0 text-center">
+                            <p class="m-2">Mã voucher cực sốc</p>
+                            <p class="m-2">Mã giảm giá <span class="bg-danger p-1 rounded text-white">@voucher.Seri</span></p>
+                            <p class="m-2">Giảm <span class="bg-success p-1 rounded text-white">@String.Format("{0:0,0}", voucher.Value) đ</span></p>
+                            <p class="m-2">Hạn cuối @voucher.EndDate.ToString("dd/MM/yyyy")</p>
+                        </div>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="row m-auto mt-5" style="width: 77em">
+    <div class="row p-2 rounded m-auto border" style="width: 73.7em">
+        @using (Html.BeginForm("Search", "Product", FormMethod.Get, new { @class = "row d-flex justify-content-center" }))
+        {
+            <div class="row">
+                <div class="col-sm-9 row">
+                    <div class="col-sm-3">
+                        <label class="form-label">Loại sản phẩm</label>
+                        <select class="form-select" name="CategoryID" id="category_search">
+                            <option value="All">All</option>
+                            @foreach (Category category in categories)
+                            {
+                                <option value="@category.ID">@category.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-sm-5">
+                        <label class="form-label align-items-center">Giá sản phẩm</label>
+                        <div class="d-flex align-items-center">
+                            <div class="col-6">
+                                <input name="minValue" type="number" placeholder="Nhập giá thấp nhất" class="form-control col-3" id="minValue_search" />
+                            </div>
+
+                            <span class="p-2 fw-bold">-</span>
+                            <div class="col-6">
+                                <input name="maxValue" type="number" placeholder="Nhập giá cao nhất" class="form-control col-3" id="maxValue_search" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 ms-3">
+                        <label class="form-label">Tình trạng</label>
+                        <select class="form-select" name="state" id="state_search">
+                            <option value="">All</option>
+                            <option value="true">Còn hàng</option>
+                            <option value="false">Hết hàng</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-sm-3 p-0 ms-auto">
+                    <label class="form-label">Tìm kiếm</label>
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" id="keyword_search" name="keyword" placeholder="Nhập từ khóa tìm kiếm">
+                        <button class="btn btn-primary" type="submit" id="btn_search"><i class="fa-solid fa-magnifying-glass"></i></button>
+                    </div>
+                </div>
+            </div>
+
+        }
+    </div>
+    <div class="p-0 justify-content-md-center m-auto mt-3" style="display: inline-block;width: 73.7em">
+        @foreach (Product product in products)
+        {
+            <figure class="figure bg-white rounded m-1 p-0 product_hover border" style="width: 14rem">
+                <a href="@Url.Action("Index", "Product", new { id = product.ID })">
+                    <img src="@product.Image"
+                         class="figure-img img-fluid rounded-top border-bottom"
+                         style="width: 100%; height: 250px;object-fit: cover;">
+                </a>
+                <figcaption class="text-start p-2 m-0">
+                    <a class="m-0 fw-bold text-dark text-decoration-none" href="" @Url.Action("Index", "Product", new { id = product.ID }) "">@product.Name</a>
+                    <p class="m-0 text-danger">@String.Format("{0:0,0}", product.Price) đ</p>
+                    <div class="m-0 d-flex justify-content-between align-items-center">
+                        @if (product.Stock > 0)
+                        {
+                            <div class="text-white bg-success rounded p-1">
+                                Còn hàng
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-white bg-danger rounded p-1">
+                                Hết hàng
+                            </div>
+                        }
+                        <div class="fs-6">
+                            Đã bán @product.Sold
+                        </div>
+                    </div>
+                </figcaption>
+            </figure>
+        }
+    </div>
+    <div class="p-0 d-flex justify-content-center mt-3" style="width: 73.7em">
+        @Html.Partial("_Pagination", ViewBag.pagingData as PagingModel)
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/public/js/lightslider.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#lastedProduct').lightSlider({
+                loop: true,
+                item: 3,
+                slideMove: 1,
+                controls: true,
+                nextHtml: '>',
+                prevHtml: '<',
+                enableDrag: true,
+                pauseOnHover: true,
+                speed: 1000,
+                pause: 5000,
+                auto: true,
+                pager: false,
+                onSliderLoad: function () {
+                    $('#autoWidth').removeClass('cS-hidden');
+                }
+            });
+            $('#voucher').lightSlider({
+                loop: true,
+                item: 1,
+                auto: true,
+                controls: true,
+                prevHtml: '<',
+                nextHtml: '>',
+                speed: 1000,
+                pause: 5000,
+                pauseOnHover: true,
+                pager: true,
+                onSliderLoad: function () {
+                    $('#autoWidth').removeClass('cS-hidden');
+                }
+            });
+        });
+    </script>
+}
